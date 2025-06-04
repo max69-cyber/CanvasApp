@@ -37,6 +37,7 @@ let startY = 0;
 let isDrawing = false;
 //редактируемая фигура
 let currentShape: Shape | null = null;
+let currentColor: string = "#000000";
 
 // enum для типов фигур
 enum ShapeType {
@@ -66,6 +67,12 @@ document.querySelectorAll<HTMLButtonElement>("#toolbar button").forEach(button =
 // массив всего что на канвасе
 const shapes: Shape[] = [];
 
+//получаем цвет из инпута
+const colorInput = document.getElementById("color-picker") as HTMLInputElement;
+colorInput.addEventListener("input", (e) => {
+  currentColor = (e.target as HTMLInputElement).value;
+})
+
 //начало создания, ивент на нажатие по канвасу
 canvas.addEventListener("mousedown", (e: MouseEvent) => {
   isDrawing = true;
@@ -78,7 +85,7 @@ canvas.addEventListener("mousedown", (e: MouseEvent) => {
 
   //создаем экземпляр фигуры в одной точке
   // TODO: сделать кнопки для выбора фигур
-  currentShape = createShape(currentShapeType, startX, startY, startX, startY, "#000000", 7)
+  currentShape = createShape(currentShapeType, startX, startY, startX, startY, currentColor, 7)
 });
 
 //регулировка размера, ивент на движение курсора
