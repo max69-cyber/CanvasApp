@@ -14,20 +14,6 @@ function getCanvasContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
   return context;
 }
 
-//обеспечивает адаптивный размер для canvas
-function resizeCanvas() {
-  const toolbarMargin: number = 50;
-  const borderMargin: number = 10;
-  canvas.width = window.innerWidth - borderMargin * 2;
-  canvas.height = window.innerHeight - toolbarMargin - borderMargin;
-  canvas.style.top = `${toolbarMargin}px`;
-  canvas.style.left = `${borderMargin}px`;
-}
-
-//при изменении размера окна подстроим canvas
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas();
-
 // логика создания фигуры
 
 //точки начала рисования
@@ -38,6 +24,7 @@ let isDrawing = false;
 //редактируемая фигура
 let currentShape: Shape | null = null;
 let currentColor: string = "#000000";
+let currentLineWidth: number = 5;
 
 // enum для типов фигур
 enum ShapeType {
@@ -67,11 +54,24 @@ document.querySelectorAll<HTMLButtonElement>("#toolbar button").forEach(button =
 // массив всего что на канвасе
 const shapes: Shape[] = [];
 
+//при изменении размера окна подстроим canvas
+window.addEventListener("resize", resizeCanvas);
+resizeCanvas();
+
 //получаем цвет из инпута
 const colorInput = document.getElementById("color-picker") as HTMLInputElement;
-colorInput.addEventListener("input", (e) => {
-  currentColor = (e.target as HTMLInputElement).value;
+colorInput.addEventListener("input", () => {
+  currentColor = colorInput.value;
 })
+
+//получаем толщину линии из соответствующего инпута
+const lineWidthInput = document.getElementById("line-width") as HTMLInputElement;
+lineWidthInput.addEventListener("input", (): void => {
+  const parsedLineWidth: number = parseInt(lineWidthInput.value);
+  if(parsedLineWidth >= 1 && parsedLineWidth <= 20 && !isNaN(parsedLineWidth)) {
+    currentLineWidth = parsedLineWidth;
+  }
+});
 
 //начало создания, ивент на нажатие по канвасу
 canvas.addEventListener("mousedown", (e: MouseEvent) => {
@@ -85,7 +85,7 @@ canvas.addEventListener("mousedown", (e: MouseEvent) => {
 
   //создаем экземпляр фигуры в одной точке
   // TODO: сделать кнопки для выбора фигур
-  currentShape = createShape(currentShapeType, startX, startY, startX, startY, currentColor, 7)
+  currentShape = createShape(currentShapeType, startX, startY, startX, startY, currentColor, currentLineWidth);
 });
 
 //регулировка размера, ивент на движение курсора
@@ -126,5 +126,16 @@ function drawAll(): void {
   for(const shape of shapes) {
     shape.draw(ctx);
   }
+}
+
+//обеспечивает адаптивный размер для canvas
+function resizeCanvas() {
+  const toolbarMargin: number = 50;
+  const borderMargin: number = 10;
+  canvas.width = window.innerWidth - borderMargin * 2;
+  canvas.height = window.innerHeight - toolbarMargin - borderMargin;
+  canvas.style.top = `${toolbarMargin}px`;
+  canvas.style.left = `${borderMargin}px`;
+  drawAll();
 }
 
