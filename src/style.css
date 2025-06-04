@@ -81,6 +81,9 @@ button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
+button.active {
+  border-color: #3b3bff;
+}
 
 #canvas {
   display: block;
@@ -88,6 +91,16 @@ button:focus-visible {
   background-color: #f9f9f9;
   position: absolute;
 }
+
+#toolbar {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  display: flex;
+  gap: 10px;
+  z-index: 10;
+}
+
 
 @media (prefers-color-scheme: light) {
   :root {

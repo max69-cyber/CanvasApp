@@ -5,6 +5,7 @@ export interface IShape {
     x2: number;
     y2: number;
     color: string;
+    lineWidth: number;
 
     draw(ctx: CanvasRenderingContext2D): void;
     move(dx: number, dy: number): void;

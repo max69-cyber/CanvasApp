@@ -13,6 +13,7 @@ export class Rectangle extends Shape {
 
         // устанавливаем цвет линии и рисуем прямоугольник по его верхнему левому углу и длинам сторон
         ctx.strokeStyle = this.color;
+        ctx.lineWidth = this.lineWidth;
         ctx.strokeRect(x, y, width, height);
     }
 }

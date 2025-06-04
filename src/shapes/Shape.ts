@@ -9,6 +9,7 @@ constructor(
     public x2: number,
     public y2: number,
     public color: string,
+    public lineWidth: number
   ) {}
 
   abstract draw(ctx: CanvasRenderingContext2D): void;

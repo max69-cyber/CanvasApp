@@ -1,5 +1,5 @@
-import { Rectangle } from "./shapes/Rectangle";
 import type { Shape } from "./shapes/Shape";
+import {createShape} from "./shapes/ShapeFactory.ts";
 
 //получаем canvas и говорим что он точно canvas
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -13,9 +13,6 @@ function getCanvasContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
   }
   return context;
 }
-  
-
-
 
 //обеспечивает адаптивный размер для canvas
 function resizeCanvas() {
@@ -41,6 +38,31 @@ let isDrawing = false;
 //редактируемая фигура
 let currentShape: Shape | null = null;
 
+// enum для типов фигур
+enum ShapeType {
+  Rectangle = "rectangle",
+  Ellipse = "ellipse",
+  Line = "line"
+}
+
+// переменная хранит текущий тип фигуры, по дефолту - прямоугольник
+let currentShapeType: ShapeType = ShapeType.Rectangle;
+
+// выбор фигуры, выбираем кнопки с toolbar, для каждой пишем ивент, который при нажатии берет ее тип фигуры и устанавливает как активный для рисования
+document.querySelectorAll<HTMLButtonElement>("#toolbar button").forEach(button => {
+      button.addEventListener("click", () => {
+        const shape: string | undefined = button.dataset.shape;
+        if (shape && Object.values(ShapeType).includes(shape as ShapeType)) {
+          currentShapeType = button.dataset.shape as ShapeType;
+        }
+
+        //для выделения активной фигуры
+        document.querySelectorAll("#toolbar button").forEach(b => b.classList.remove("active"));
+        button.classList.add("active");
+      });
+    }
+);
+
 // массив всего что на канвасе
 const shapes: Shape[] = [];
 
@@ -56,7 +78,7 @@ canvas.addEventListener("mousedown", (e: MouseEvent) => {
 
   //создаем экземпляр фигуры в одной точке
   // TODO: сделать кнопки для выбора фигур
-  currentShape = new Rectangle(startX, startY, startX, startY, "#000000");
+  currentShape = createShape(currentShapeType, startX, startY, startX, startY, "#000000", 7)
 });
 
 //регулировка размера, ивент на движение курсора
