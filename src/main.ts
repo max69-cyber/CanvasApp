@@ -34,6 +34,9 @@ let draggedShape: Shape | null = null;
 let offsetX: number = 0;
 let offsetY: number = 0;
 
+//переключатель перемещения
+let isMoveMode = false;
+
 // enum для типов фигур
 enum ShapeType {
   Rectangle = "rectangle",
@@ -72,6 +75,15 @@ redoButton.addEventListener("click", (): void => {
   commandManager.log();
   drawAll();
 });
+
+// событие на вкл/выкл перемещения фигур
+const moveToggleBtn = document.getElementById("move-toggle") as HTMLButtonElement;
+
+moveToggleBtn.addEventListener("click", () => {
+  isMoveMode = !isMoveMode;
+  moveToggleBtn.textContent = `Режим перемещения: ${isMoveMode ? "вкл" : "выкл"}`;
+});
+
 
 
 // массив всего что на канвасе
@@ -115,13 +127,15 @@ canvas.addEventListener("mousedown", (e: MouseEvent) => {
   startY = e.clientY - canvasRect.top;
 
   //проходимся по массиву фигур чтобы проверить хочет ли пользователь переместить фигуру или создать
-  for (let i = shapes.length - 1; i >= 0; i--) {
-    if (shapes[i].contains(startX, startY)) {
-      draggedShape = shapes[i];
-      offsetX = startX - draggedShape.x1;
-      offsetY = startY - draggedShape.y1;
-      isDrawing = false;
-      return;
+  if(isMoveMode) {
+    for (let i = shapes.length - 1; i >= 0; i--) {
+      if (shapes[i].contains(startX, startY)) {
+        draggedShape = shapes[i];
+        offsetX = startX - draggedShape.x1;
+        offsetY = startY - draggedShape.y1;
+        isDrawing = false;
+        return;
+      }
     }
   }
 
