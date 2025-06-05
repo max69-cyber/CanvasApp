@@ -31,8 +31,4 @@ export class CommandManager {
             this.undoStack.push(command);
         }
     }
-
-    log(){
-        console.log(this.undoStack);
-    }
 }

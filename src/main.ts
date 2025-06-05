@@ -2,6 +2,7 @@ import type { Shape } from "./shapes/Shape";
 import {createShape} from "./shapes/ShapeFactory.ts";
 import {CommandManager} from "./commands/CommandManager.ts";
 import {AddShapeCommand} from "./commands/AddShapeCommand.ts";
+import {MoveShapeCommand} from "./commands/MoveShapeCommand.ts";
 
 //получаем canvas и говорим что он точно canvas
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -67,12 +68,10 @@ const undoButton: HTMLButtonElement | undefined = document.getElementById("undoB
 const redoButton: HTMLButtonElement | undefined = document.getElementById("redoButton") as HTMLButtonElement;
 undoButton.addEventListener("click", (): void => {
   commandManager.undo();
-  commandManager.log();
   drawAll();
 });
 redoButton.addEventListener("click", (): void => {
   commandManager.redo();
-  commandManager.log();
   drawAll();
 });
 
@@ -88,7 +87,7 @@ moveToggleBtn.addEventListener("click", () => {
 
 // массив всего что на канвасе
 const shapes: Shape[] = [];
-// иницализация менеджера команд
+// инициализация менеджера команд
 const commandManager: CommandManager = new CommandManager();
 
 //при изменении размера окна подстроим canvas
@@ -143,6 +142,7 @@ canvas.addEventListener("mousedown", (e: MouseEvent) => {
   currentShape = createShape(currentShapeType, startX, startY, startX, startY, currentColor, currentLineWidth);
 });
 
+
 //регулировка размера, ивент на движение курсора
 canvas.addEventListener("mousemove", (e: MouseEvent) => {
 
@@ -154,6 +154,7 @@ canvas.addEventListener("mousemove", (e: MouseEvent) => {
   if (draggedShape) {
     const dx = x - draggedShape.x1 - offsetX;
     const dy = y - draggedShape.y1 - offsetY;
+
     draggedShape.move(dx, dy);
     drawAll();
     return;
@@ -171,16 +172,25 @@ canvas.addEventListener("mousemove", (e: MouseEvent) => {
 });
 
 // конец создания фигуры, ивент на отжатие кнопки мыши
-canvas.addEventListener("mouseup", () => {
+canvas.addEventListener("mouseup", (e) => {
   // добавляем в массив всех фигур готовую (через функцию класса commandManager) и сбрасываем выделение
   if (currentShape) {
     const command: AddShapeCommand = new AddShapeCommand(shapes, currentShape);
     commandManager.executeCommand(command);
     currentShape = null;
+    isDrawing = false;
   }
-  isDrawing = false;
-  draggedShape = null;
 
+  if(draggedShape){
+    //вычисляем насколько сдвинулась фигура
+    const canvasRect = canvas.getBoundingClientRect();
+    const dx: number = e.clientX - canvasRect.left - startX;
+    const dy: number = e.clientY - canvasRect.top - startY;
+    //создаем новую команду перемещения
+    const command: MoveShapeCommand = new MoveShapeCommand(draggedShape, dx, dy);
+    commandManager.executeCommand(command);
+    draggedShape = null;
+  }
   drawAll();
 });
 
