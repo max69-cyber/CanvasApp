@@ -1,5 +1,7 @@
 import type { Shape } from "./shapes/Shape";
 import {createShape} from "./shapes/ShapeFactory.ts";
+import {CommandManager} from "./commands/CommandManager.ts";
+import {AddShapeCommand} from "./commands/AddShapeCommand.ts";
 
 //получаем canvas и говорим что он точно canvas
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -57,8 +59,25 @@ document.querySelectorAll<HTMLButtonElement>("#toolbar button").forEach(button =
     }
 );
 
+//обработка нажатий на кнопки отмены и отмены отмены
+const undoButton: HTMLButtonElement | undefined = document.getElementById("undoButton") as HTMLButtonElement;
+const redoButton: HTMLButtonElement | undefined = document.getElementById("redoButton") as HTMLButtonElement;
+undoButton.addEventListener("click", (): void => {
+  commandManager.undo();
+  commandManager.log();
+  drawAll();
+});
+redoButton.addEventListener("click", (): void => {
+  commandManager.redo();
+  commandManager.log();
+  drawAll();
+});
+
+
 // массив всего что на канвасе
 const shapes: Shape[] = [];
+// иницализация менеджера команд
+const commandManager: CommandManager = new CommandManager();
 
 //при изменении размера окна подстроим canvas
 window.addEventListener("resize", resizeCanvas);
@@ -139,9 +158,10 @@ canvas.addEventListener("mousemove", (e: MouseEvent) => {
 
 // конец создания фигуры, ивент на отжатие кнопки мыши
 canvas.addEventListener("mouseup", () => {
-  // добавляем в массив всех фигур готовую и сбрасываем выделение
+  // добавляем в массив всех фигур готовую (через функцию класса commandManager) и сбрасываем выделение
   if (currentShape) {
-    shapes.push(currentShape);
+    const command: AddShapeCommand = new AddShapeCommand(shapes, currentShape);
+    commandManager.executeCommand(command);
     currentShape = null;
   }
   isDrawing = false;
