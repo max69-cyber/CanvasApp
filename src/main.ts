@@ -14,7 +14,7 @@ function getCanvasContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
   return context;
 }
 
-// логика создания фигуры
+// логика создания и перемещения фигуры
 
 //точки начала рисования
 let startX = 0;
@@ -25,6 +25,12 @@ let isDrawing = false;
 let currentShape: Shape | null = null;
 let currentColor: string = "#000000";
 let currentLineWidth: number = 5;
+
+//переменная для хранения перемещаемой фигуры
+let draggedShape: Shape | null = null;
+//хранят смещение от угла фигуры для более удобного перемещения
+let offsetX: number = 0;
+let offsetY: number = 0;
 
 // enum для типов фигур
 enum ShapeType {
@@ -73,6 +79,12 @@ lineWidthInput.addEventListener("input", (): void => {
   }
 });
 
+//подставляем текущие дефолтные значения, чтобы при перезагрузке не оставались с прошлого сеанса
+window.addEventListener("load", (): void => {
+  colorInput.value = currentColor;
+  lineWidthInput.value = currentLineWidth.toString();
+});
+
 //начало создания, ивент на нажатие по канвасу
 canvas.addEventListener("mousedown", (e: MouseEvent) => {
   isDrawing = true;
@@ -83,27 +95,46 @@ canvas.addEventListener("mousedown", (e: MouseEvent) => {
   startX = e.clientX - canvasRect.left;
   startY = e.clientY - canvasRect.top;
 
+  //проходимся по массиву фигур чтобы проверить хочет ли пользователь переместить фигуру или создать
+  for (let i = shapes.length - 1; i >= 0; i--) {
+    if (shapes[i].contains(startX, startY)) {
+      draggedShape = shapes[i];
+      offsetX = startX - draggedShape.x1;
+      offsetY = startY - draggedShape.y1;
+      isDrawing = false;
+      return;
+    }
+  }
+
   //создаем экземпляр фигуры в одной точке
-  // TODO: сделать кнопки для выбора фигур
   currentShape = createShape(currentShapeType, startX, startY, startX, startY, currentColor, currentLineWidth);
 });
 
 //регулировка размера, ивент на движение курсора
 canvas.addEventListener("mousemove", (e: MouseEvent) => {
-  //проверяем редактируется ли фигура
-  if(!isDrawing || !currentShape) return;
 
   const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
+  const x: number = e.clientX - rect.left;
+  const y: number = e.clientY - rect.top;
 
-  //устанавливаем вторую точку фигуры
-  currentShape.x2 = x;
-  currentShape.y2 = y;
+  // проверка на перетаскивание
+  if (draggedShape) {
+    const dx = x - draggedShape.x1 - offsetX;
+    const dy = y - draggedShape.y1 - offsetY;
+    draggedShape.move(dx, dy);
+    drawAll();
+    return;
+  }
 
-  drawAll();
-  //отрисовываем для просмотра
-  currentShape.draw(ctx);
+  if(isDrawing && currentShape){
+    //устанавливаем вторую точку фигуры
+    currentShape.x2 = x;
+    currentShape.y2 = y;
+
+    drawAll();
+    //отрисовываем для просмотра
+    currentShape.draw(ctx);
+  }
 });
 
 // конец создания фигуры, ивент на отжатие кнопки мыши
@@ -114,6 +145,7 @@ canvas.addEventListener("mouseup", () => {
     currentShape = null;
   }
   isDrawing = false;
+  draggedShape = null;
 
   drawAll();
 });
@@ -138,4 +170,5 @@ function resizeCanvas() {
   canvas.style.left = `${borderMargin}px`;
   drawAll();
 }
+
 

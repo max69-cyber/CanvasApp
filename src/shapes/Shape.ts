@@ -13,6 +13,7 @@ constructor(
   ) {}
 
   abstract draw(ctx: CanvasRenderingContext2D): void;
+  abstract contains(x: number, y: number): boolean;
 
   move(dx: number, dy: number) {
     this.x1 += dx;
