@@ -59,8 +59,9 @@ body {
 }
 
 #toolbar input[type="color"] {
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  background: transparent;
+  height: 38px;
   padding: 0;
   border: none;
   border-radius: 7px;
