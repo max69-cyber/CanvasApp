@@ -49,19 +49,17 @@ enum ShapeType {
 let currentShapeType: ShapeType = ShapeType.Rectangle;
 
 // выбор фигуры, выбираем кнопки с toolbar, для каждой пишем ивент, который при нажатии берет ее тип фигуры и устанавливает как активный для рисования
-document.querySelectorAll<HTMLButtonElement>("#toolbar button").forEach(button => {
-      button.addEventListener("click", () => {
-        const shape: string | undefined = button.dataset.shape;
-        if (shape && Object.values(ShapeType).includes(shape as ShapeType)) {
-          currentShapeType = button.dataset.shape as ShapeType;
-        }
-
-        //для выделения активной фигуры
-        document.querySelectorAll("#toolbar button").forEach(b => b.classList.remove("active"));
-        button.classList.add("active");
-      });
+document.querySelectorAll<HTMLButtonElement>('#toolbar button[data-shape]').forEach(button => {
+  button.addEventListener('click', () => {
+    const shape = button.dataset.shape;
+    if (shape && Object.values(ShapeType).includes(shape as ShapeType)) {
+      currentShapeType = shape as ShapeType;
     }
-);
+
+    document.querySelectorAll('#toolbar button[data-shape]').forEach(b => b.classList.remove('active'));
+    button.classList.add('active');
+  });
+});
 
 //обработка нажатий на кнопки отмены и отмены отмены
 const undoButton: HTMLButtonElement | undefined = document.getElementById("undoButton") as HTMLButtonElement;
@@ -77,10 +75,13 @@ redoButton.addEventListener("click", (): void => {
 
 // событие на вкл/выкл перемещения фигур
 const moveToggleBtn = document.getElementById("move-toggle") as HTMLButtonElement;
-
 moveToggleBtn.addEventListener("click", () => {
   isMoveMode = !isMoveMode;
-  moveToggleBtn.textContent = `Режим перемещения: ${isMoveMode ? "вкл" : "выкл"}`;
+  if(isMoveMode) {
+    moveToggleBtn.classList.add("active");
+  } else {
+    moveToggleBtn.classList.remove("active");
+  }
 });
 
 
@@ -104,7 +105,7 @@ colorInput.addEventListener("input", () => {
 const lineWidthInput = document.getElementById("line-width") as HTMLInputElement;
 lineWidthInput.addEventListener("input", (): void => {
   const parsedLineWidth: number = parseInt(lineWidthInput.value);
-  if(parsedLineWidth >= 1 && parsedLineWidth <= 20 && !isNaN(parsedLineWidth)) {
+  if(parsedLineWidth >= 1 && parsedLineWidth <= 100 && !isNaN(parsedLineWidth)) {
     currentLineWidth = parsedLineWidth;
   }
 });
@@ -206,7 +207,7 @@ function drawAll(): void {
 
 //обеспечивает адаптивный размер для canvas
 function resizeCanvas() {
-  const toolbarMargin: number = 50;
+  const toolbarMargin: number = 10;
   const borderMargin: number = 10;
   canvas.width = window.innerWidth - borderMargin * 2;
   canvas.height = window.innerHeight - toolbarMargin - borderMargin;

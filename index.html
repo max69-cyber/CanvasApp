@@ -7,14 +7,26 @@
   </head>
   <body>
     <div id="toolbar">
-      <button id="move-toggle">Перемещение: выкл</button>
-      <button data-shape="rectangle">🔳</button>
-      <button data-shape="ellipse">⭕</button>
-      <button data-shape="line">|</button>
+      <button id="move-toggle">
+        <img src="/icons/move.svg" width="27" height="27">
+      </button>
+      <button data-shape="rectangle">
+        <img src="/icons/square.svg" width="27" height="27">
+      </button>
+      <button data-shape="ellipse">
+        <img src="/icons/circle.svg" width="27" height="27">
+      </button>
+      <button data-shape="line">
+        <img src="/icons/line.svg" width="27" height="27">
+      </button>
       <input id="color-picker" type="color">
-      <input id="line-width" type="number" min="1" max="25" value="5">
-      <button id="undoButton">undo</button>
-      <button id="redoButton">redo</button>
+      <input id="line-width" type="number" min="1" max="100" value="5">
+      <button id="undoButton">
+        <img src="/icons/undo.svg" width="27" height="27">
+      </button>
+      <button id="redoButton">
+        <img src="/icons/redo.svg" width="27" height="27">
+      </button>
     </div>
     <canvas id="canvas"></canvas>
     <script type="module" src="/src/main.ts"></script>
