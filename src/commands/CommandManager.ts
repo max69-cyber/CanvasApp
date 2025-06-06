@@ -1,6 +1,6 @@
 //менеджер, который управляет командами и хранит их
 
-import type {ICommand} from "./ICommand.ts";
+import type {ICommand} from "./interfaces/ICommand.ts";
 
 export class CommandManager {
     // здесь хранятся все команды которые могут быть отменены, либо уже отменены

@@ -1,6 +1,6 @@
 //создает экземпляры фигур определенного типа
 
-import type {IShape} from "./IShape.ts";
+import type {IShape} from "./interfaces/IShape.ts";
 import {Rectangle} from "./Rectangle.ts";
 import {Ellipse} from "./Ellipse.ts";
 import {Line} from "./Line.ts";

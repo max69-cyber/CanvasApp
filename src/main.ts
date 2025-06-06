@@ -3,118 +3,34 @@ import {createShape} from "./shapes/ShapeFactory.ts";
 import {CommandManager} from "./commands/CommandManager.ts";
 import {AddShapeCommand} from "./commands/AddShapeCommand.ts";
 import {MoveShapeCommand} from "./commands/MoveShapeCommand.ts";
-
-//получаем canvas и говорим что он точно canvas
-const canvas = document.getElementById("canvas") as HTMLCanvasElement;
-const ctx = getCanvasContext(canvas);
-
-//функция для безопасного получения контекста канваса
-function getCanvasContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
-  const context = canvas.getContext("2d");
-  if (!context) {
-    throw new Error("Не удалось получить 2d контекст!");
-  }
-  return context;
-}
-
-// логика создания и перемещения фигуры
-
-//точки начала рисования
-let startX = 0;
-let startY = 0;
-//состояние рисования - чтобы понять когда пользователь создает фигуру при движении курсора
-let isDrawing = false;
-//редактируемая фигура
-let currentShape: Shape | null = null;
-let currentColor: string = "#000000";
-let currentLineWidth: number = 5;
-
-//переменная для хранения перемещаемой фигуры
-let draggedShape: Shape | null = null;
-//хранят смещение от угла фигуры для более удобного перемещения
-let offsetX: number = 0;
-let offsetY: number = 0;
-
-//переключатель перемещения
-let isMoveMode = false;
-
-// enum для типов фигур
-enum ShapeType {
-  Rectangle = "rectangle",
-  Ellipse = "ellipse",
-  Line = "line"
-}
-
-// переменная хранит текущий тип фигуры, по дефолту - прямоугольник
-let currentShapeType: ShapeType = ShapeType.Rectangle;
-
-// выбор фигуры, выбираем кнопки с toolbar, для каждой пишем ивент, который при нажатии берет ее тип фигуры и устанавливает как активный для рисования
-document.querySelectorAll<HTMLButtonElement>('#toolbar button[data-shape]').forEach(button => {
-  button.addEventListener('click', () => {
-    const shape = button.dataset.shape;
-    if (shape && Object.values(ShapeType).includes(shape as ShapeType)) {
-      currentShapeType = shape as ShapeType;
-    }
-
-    document.querySelectorAll('#toolbar button[data-shape]').forEach(b => b.classList.remove('active'));
-    button.classList.add('active');
-  });
-});
-
-//обработка нажатий на кнопки отмены и отмены отмены
-const undoButton: HTMLButtonElement | undefined = document.getElementById("undoButton") as HTMLButtonElement;
-const redoButton: HTMLButtonElement | undefined = document.getElementById("redoButton") as HTMLButtonElement;
-undoButton.addEventListener("click", (): void => {
-  commandManager.undo();
-  drawAll();
-});
-redoButton.addEventListener("click", (): void => {
-  commandManager.redo();
-  drawAll();
-});
-
-// событие на вкл/выкл перемещения фигур
-const moveToggleBtn = document.getElementById("move-toggle") as HTMLButtonElement;
-moveToggleBtn.addEventListener("click", () => {
-  isMoveMode = !isMoveMode;
-  if(isMoveMode) {
-    moveToggleBtn.classList.add("active");
-  } else {
-    moveToggleBtn.classList.remove("active");
-  }
-});
-
-
+import {CanvasManager} from "./CanvasManager.ts";
+import {Toolbar} from "./Toolbar.ts";
 
 // массив всего что на канвасе
 const shapes: Shape[] = [];
 // инициализация менеджера команд
 const commandManager: CommandManager = new CommandManager();
 
-//при изменении размера окна подстроим canvas
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas();
+const canvasManager = new CanvasManager("canvas", shapes);
+const toolbar = new Toolbar();
 
-//получаем цвет из инпута
-const colorInput = document.getElementById("color-picker") as HTMLInputElement;
-colorInput.addEventListener("input", () => {
-  currentColor = colorInput.value;
-})
+const canvas = canvasManager.getCanvas();
+const ctx = canvasManager.getContext();
 
-//получаем толщину линии из соответствующего инпута
-const lineWidthInput = document.getElementById("line-width") as HTMLInputElement;
-lineWidthInput.addEventListener("input", (): void => {
-  const parsedLineWidth: number = parseInt(lineWidthInput.value);
-  if(parsedLineWidth >= 1 && parsedLineWidth <= 100 && !isNaN(parsedLineWidth)) {
-    currentLineWidth = parsedLineWidth;
-  }
-});
+// логика создания и перемещения фигуры
 
-//подставляем текущие дефолтные значения, чтобы при перезагрузке не оставались с прошлого сеанса
-window.addEventListener("load", (): void => {
-  colorInput.value = currentColor;
-  lineWidthInput.value = currentLineWidth.toString();
-});
+//точки начала рисования
+let startX: number = 0;
+let startY: number = 0;
+//состояние рисования - чтобы понять когда пользователь создает фигуру при движении курсора
+let isDrawing: boolean = false;
+//переменная для хранения текущей фигуры
+let currentShape: Shape | null = null;
+//переменная для хранения перемещаемой фигуры
+let draggedShape: Shape | null = null;
+//хранят смещение от угла фигуры для более удобного перемещения
+let offsetX: number = 0;
+let offsetY: number = 0;
 
 //начало создания, ивент на нажатие по канвасу
 canvas.addEventListener("mousedown", (e: MouseEvent) => {
@@ -127,7 +43,7 @@ canvas.addEventListener("mousedown", (e: MouseEvent) => {
   startY = e.clientY - canvasRect.top;
 
   //проходимся по массиву фигур чтобы проверить хочет ли пользователь переместить фигуру или создать
-  if(isMoveMode) {
+  if(toolbar.isMoveMode) {
     for (let i = shapes.length - 1; i >= 0; i--) {
       if (shapes[i].contains(startX, startY)) {
         draggedShape = shapes[i];
@@ -140,13 +56,11 @@ canvas.addEventListener("mousedown", (e: MouseEvent) => {
   }
 
   //создаем экземпляр фигуры в одной точке
-  currentShape = createShape(currentShapeType, startX, startY, startX, startY, currentColor, currentLineWidth);
+  currentShape = createShape(toolbar.currentShapeType, startX, startY, startX, startY, toolbar.currentColor, toolbar.currentLineWidth);
 });
-
 
 //регулировка размера, ивент на движение курсора
 canvas.addEventListener("mousemove", (e: MouseEvent) => {
-
   const rect = canvas.getBoundingClientRect();
   const x: number = e.clientX - rect.left;
   const y: number = e.clientY - rect.top;
@@ -157,7 +71,7 @@ canvas.addEventListener("mousemove", (e: MouseEvent) => {
     const dy = y - draggedShape.y1 - offsetY;
 
     draggedShape.move(dx, dy);
-    drawAll();
+    canvasManager.drawAll();
     return;
   }
 
@@ -166,7 +80,7 @@ canvas.addEventListener("mousemove", (e: MouseEvent) => {
     currentShape.x2 = x;
     currentShape.y2 = y;
 
-    drawAll();
+    canvasManager.drawAll();
     //отрисовываем для просмотра
     currentShape.draw(ctx);
   }
@@ -192,28 +106,17 @@ canvas.addEventListener("mouseup", (e) => {
     commandManager.executeCommand(command);
     draggedShape = null;
   }
-  drawAll();
+  canvasManager.drawAll();
 });
 
-//отрисовка всех существующих фигур
-function drawAll(): void {
-  //очистка канваса
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  //рисуем все фигуры
-  for(const shape of shapes) {
-    shape.draw(ctx);
-  }
-}
-
-//обеспечивает адаптивный размер для canvas
-function resizeCanvas() {
-  const toolbarMargin: number = 10;
-  const borderMargin: number = 10;
-  canvas.width = window.innerWidth - borderMargin * 2;
-  canvas.height = window.innerHeight - toolbarMargin - borderMargin;
-  canvas.style.top = `${toolbarMargin}px`;
-  canvas.style.left = `${borderMargin}px`;
-  drawAll();
-}
-
-
+//обработка нажатий на кнопки отмены и отмены отмены
+const undoButton: HTMLButtonElement | undefined = document.getElementById("undoButton") as HTMLButtonElement;
+const redoButton: HTMLButtonElement | undefined = document.getElementById("redoButton") as HTMLButtonElement;
+undoButton.addEventListener("click", (): void => {
+  commandManager.undo();
+  canvasManager.drawAll();
+});
+redoButton.addEventListener("click", (): void => {
+  commandManager.redo();
+  canvasManager.drawAll();
+});

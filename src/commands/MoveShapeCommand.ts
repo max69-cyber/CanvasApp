@@ -1,6 +1,6 @@
-//команда отвечающая за создание фигуры
+//команда отвечающая за перемещение фигуры
 
-import type {ICommand} from "./ICommand.ts";
+import type {ICommand} from "./interfaces/ICommand.ts";
 import type {Shape} from "../shapes/Shape.ts";
 
 export class MoveShapeCommand implements ICommand {
@@ -11,7 +11,7 @@ export class MoveShapeCommand implements ICommand {
         private dy: number
     ) {}
 
-    execute() {
+    execute(): void {
     }
 
     //перемещение обратно

@@ -1,13 +1,13 @@
 //команда отвечающая за создание фигуры
 
-import type {ICommand} from "./ICommand.ts";
+import type {ICommand} from "./interfaces/ICommand.ts";
 import type {Shape} from "../shapes/Shape.ts";
 
 export class AddShapeCommand implements ICommand {
     //инкапсулируем свойства класса
     constructor(
-        private shapes: Shape[],
-        private newShape: Shape
+        private readonly shapes: Shape[],
+        private readonly newShape: Shape
     ) {}
 
     //добавление фигуры
@@ -17,6 +17,9 @@ export class AddShapeCommand implements ICommand {
 
     //удаление фигуры (через redo)
     undo(): void {
-        this.shapes.pop();
+        const index = this.shapes.indexOf(this.newShape);
+        if (index !== -1) {
+            this.shapes.splice(index, 1);
+        }
     }
 }

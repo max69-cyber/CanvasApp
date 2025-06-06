@@ -1,4 +1,4 @@
-import type { IShape } from "./IShape";
+import type { IShape } from "./interfaces/IShape.ts";
 
 // абстрактный класс с реализацией общих методов для всех фигур
 // ! возможно создать сеттеры для валидации данных
