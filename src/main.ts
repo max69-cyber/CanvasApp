@@ -101,6 +101,9 @@ canvas.addEventListener("mouseup", (e) => {
     const canvasRect: DOMRect = canvas.getBoundingClientRect();
     const dx: number = e.clientX - canvasRect.left - startX;
     const dy: number = e.clientY - canvasRect.top - startY;
+    // ? тут на самом деле костыль получается, я должен вернуть фигуру на начальную позицию, потому что хочу чтобы пользователь видел
+    // ? в реальном времени перемещение, но чтобы выполнить команду надо совершить MoveShapeCommand, для того чтобы его можно было сделать redo
+    draggedShape.move(-dx, -dy);
     //создаем новую команду перемещения
     const command: MoveShapeCommand = new MoveShapeCommand(draggedShape, dx, dy);
     commandManager.executeCommand(command);

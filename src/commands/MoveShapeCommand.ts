@@ -12,6 +12,7 @@ export class MoveShapeCommand implements ICommand {
     ) {}
 
     execute(): void {
+        this.shape.move(this.dx, this.dy);
     }
 
     //перемещение обратно
