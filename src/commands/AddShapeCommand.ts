@@ -17,7 +17,7 @@ export class AddShapeCommand implements ICommand {
 
     //удаление фигуры (через redo)
     undo(): void {
-        const index = this.shapes.indexOf(this.newShape);
+        const index: number = this.shapes.indexOf(this.newShape);
         if (index !== -1) {
             this.shapes.splice(index, 1);
         }

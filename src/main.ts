@@ -14,8 +14,8 @@ const commandManager: CommandManager = new CommandManager();
 const canvasManager = new CanvasManager("canvas", shapes);
 const toolbar = new Toolbar();
 
-const canvas = canvasManager.getCanvas();
-const ctx = canvasManager.getContext();
+const canvas: HTMLCanvasElement = canvasManager.getCanvas();
+const ctx: CanvasRenderingContext2D = canvasManager.getContext();
 
 // логика создания и перемещения фигуры
 
@@ -33,10 +33,10 @@ let offsetX: number = 0;
 let offsetY: number = 0;
 
 //начало создания, ивент на нажатие по канвасу
-canvas.addEventListener("mousedown", (e: MouseEvent) => {
+canvas.addEventListener("mousedown", (e: MouseEvent): void => {
   isDrawing = true;
   //getBoundingClientRect позволяет получить позицию канваса, чтобы работать с координатами внутри него
-  const canvasRect = canvas.getBoundingClientRect();
+  const canvasRect: DOMRect = canvas.getBoundingClientRect();
 
   //вычисляем координаты первой точки, используя canvasRect
   startX = e.clientX - canvasRect.left;
@@ -47,8 +47,8 @@ canvas.addEventListener("mousedown", (e: MouseEvent) => {
     for (let i = shapes.length - 1; i >= 0; i--) {
       if (shapes[i].contains(startX, startY)) {
         draggedShape = shapes[i];
-        offsetX = startX - draggedShape.x1;
-        offsetY = startY - draggedShape.y1;
+        offsetX = startX - draggedShape.getX1();
+        offsetY = startY - draggedShape.getY1();
         isDrawing = false;
         return;
       }
@@ -60,15 +60,15 @@ canvas.addEventListener("mousedown", (e: MouseEvent) => {
 });
 
 //регулировка размера, ивент на движение курсора
-canvas.addEventListener("mousemove", (e: MouseEvent) => {
-  const rect = canvas.getBoundingClientRect();
+canvas.addEventListener("mousemove", (e: MouseEvent): void => {
+  const rect: DOMRect = canvas.getBoundingClientRect();
   const x: number = e.clientX - rect.left;
   const y: number = e.clientY - rect.top;
 
   // проверка на перетаскивание
   if (draggedShape) {
-    const dx = x - draggedShape.x1 - offsetX;
-    const dy = y - draggedShape.y1 - offsetY;
+    const dx: number = x - draggedShape.getX1() - offsetX;
+    const dy: number = y - draggedShape.getY1() - offsetY;
 
     draggedShape.move(dx, dy);
     canvasManager.drawAll();
@@ -77,8 +77,8 @@ canvas.addEventListener("mousemove", (e: MouseEvent) => {
 
   if(isDrawing && currentShape){
     //устанавливаем вторую точку фигуры
-    currentShape.x2 = x;
-    currentShape.y2 = y;
+    currentShape.setX2(x);
+    currentShape.setY2(y);
 
     canvasManager.drawAll();
     //отрисовываем для просмотра
@@ -98,7 +98,7 @@ canvas.addEventListener("mouseup", (e) => {
 
   if(draggedShape){
     //вычисляем насколько сдвинулась фигура
-    const canvasRect = canvas.getBoundingClientRect();
+    const canvasRect: DOMRect = canvas.getBoundingClientRect();
     const dx: number = e.clientX - canvasRect.left - startX;
     const dy: number = e.clientY - canvasRect.top - startY;
     //создаем новую команду перемещения

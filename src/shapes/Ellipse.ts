@@ -3,13 +3,13 @@
 import {Shape} from "./Shape.ts";
 
 export class Ellipse extends Shape {
-    draw(ctx: CanvasRenderingContext2D) {
+    draw(ctx: CanvasRenderingContext2D): void {
         //получаем центр фигуры
-        const centerX = (this.x1 + this.x2) / 2;
-        const centerY = (this.y1 + this.y2) / 2;
+        const centerX: number = (this.x1 + this.x2) / 2;
+        const centerY: number = (this.y1 + this.y2) / 2;
         //радиусы
-        const radiusX = Math.abs(this.x1 - this.x2) / 2;
-        const radiusY = Math.abs(this.y1 - this.y2) / 2;
+        const radiusX: number = Math.abs(this.x1 - this.x2) / 2;
+        const radiusY: number = Math.abs(this.y1 - this.y2) / 2;
 
         //отрисовка эллипса
         ctx.beginPath();

@@ -1,9 +1,9 @@
 //создает экземпляры фигур определенного типа
 
-import type {IShape} from "./interfaces/IShape.ts";
 import {Rectangle} from "./Rectangle.ts";
 import {Ellipse} from "./Ellipse.ts";
 import {Line} from "./Line.ts";
+import type {Shape} from "./Shape.ts";
 
 export type ShapeType = "rectangle" | "ellipse" | "line";
 
@@ -15,7 +15,7 @@ export function createShape(
     y2: number,
     color: string,
     lineWidth: number
-): IShape {
+): Shape {
     switch (type) {
         case "rectangle":
             return new Rectangle(x1, y1, x2, y2, color, lineWidth);

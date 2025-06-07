@@ -16,11 +16,11 @@ export class CanvasManager {
         window.addEventListener("resize", (): void => this.resizeCanvas());
     }
 
-    getContext() {
+    getContext():CanvasRenderingContext2D {
         return this.ctx;
     }
 
-    getCanvas() {
+    getCanvas(): HTMLCanvasElement {
         return this.canvas;
     }
 
@@ -43,7 +43,7 @@ export class CanvasManager {
 
     //функция для безопасного получения контекста канваса
     private getCanvasContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
-        const context = canvas.getContext("2d");
+        const context: CanvasRenderingContext2D | null = canvas.getContext("2d");
         if (!context) {
             throw new Error("Не удалось получить 2d контекст!");
         }

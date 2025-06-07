@@ -23,7 +23,7 @@ export class Line extends Shape {
         const dy: number = this.y2 - this.y1;
 
         //проекция P на отрезок AB
-        const t = ((x - this.x1) * dx + (y - this.y1) * dy) / (dx * dx + dy * dy);
+        const t: number = ((x - this.x1) * dx + (y - this.y1) * dy) / (dx * dx + dy * dy);
 
         // проверка находится ли проекция внутри отрезка
         if (t < 0 || t > 1) return false;
