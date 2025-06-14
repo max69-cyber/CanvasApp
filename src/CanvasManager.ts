@@ -1,4 +1,5 @@
 ﻿import type {Shape} from "./shapes/Shape.ts";
+import type {SelectionBox} from "./shapes/SelectionBox.ts";
 
 export class CanvasManager {
     private readonly canvas: HTMLCanvasElement;
@@ -34,10 +35,14 @@ export class CanvasManager {
     }
 
     //отрисовка всех существующих фигур
-    drawAll(): void {
+    drawAll(selectionBox?: SelectionBox | null): void {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         for (const shape of this.shapes) {
             shape.draw(this.ctx);
+        }
+        if(selectionBox) {
+            selectionBox.initResizePoints();
+            selectionBox.draw(this.ctx);
         }
     }
 

@@ -5,6 +5,7 @@ import {AddShapeCommand} from "./commands/AddShapeCommand.ts";
 import {MoveShapeCommand} from "./commands/MoveShapeCommand.ts";
 import {CanvasManager} from "./CanvasManager.ts";
 import {Toolbar} from "./Toolbar.ts";
+import {SelectionBox} from "./shapes/SelectionBox.ts";
 
 // массив всего что на канвасе
 const shapes: Shape[] = [];
@@ -16,6 +17,8 @@ const toolbar = new Toolbar();
 
 const canvas: HTMLCanvasElement = canvasManager.getCanvas();
 const ctx: CanvasRenderingContext2D = canvasManager.getContext();
+
+let selectionBox: SelectionBox | null = null;
 
 // логика создания и перемещения фигуры
 
@@ -49,11 +52,15 @@ canvas.addEventListener("mousedown", (e: MouseEvent): void => {
         draggedShape = shapes[i];
         offsetX = startX - draggedShape.getX1();
         offsetY = startY - draggedShape.getY1();
+
+        selectionBox = new SelectionBox(draggedShape);
         isDrawing = false;
         return;
       }
     }
   }
+
+  selectionBox = null;
 
   //создаем экземпляр фигуры в одной точке
   currentShape = createShape(toolbar.currentShapeType, startX, startY, startX, startY, toolbar.currentColor, toolbar.currentLineWidth);
@@ -71,7 +78,7 @@ canvas.addEventListener("mousemove", (e: MouseEvent): void => {
     const dy: number = y - draggedShape.getY1() - offsetY;
 
     draggedShape.move(dx, dy);
-    canvasManager.drawAll();
+    canvasManager.drawAll(selectionBox);
     return;
   }
 
@@ -80,7 +87,7 @@ canvas.addEventListener("mousemove", (e: MouseEvent): void => {
     currentShape.setX2(x);
     currentShape.setY2(y);
 
-    canvasManager.drawAll();
+    canvasManager.drawAll(selectionBox);
     //отрисовываем для просмотра
     currentShape.draw(ctx);
   }
@@ -109,7 +116,7 @@ canvas.addEventListener("mouseup", (e) => {
     commandManager.executeCommand(command);
     draggedShape = null;
   }
-  canvasManager.drawAll();
+  canvasManager.drawAll(selectionBox);
 });
 
 //обработка нажатий на кнопки отмены и отмены отмены
@@ -117,9 +124,9 @@ const undoButton: HTMLButtonElement | undefined = document.getElementById("undoB
 const redoButton: HTMLButtonElement | undefined = document.getElementById("redoButton") as HTMLButtonElement;
 undoButton.addEventListener("click", (): void => {
   commandManager.undo();
-  canvasManager.drawAll();
+  canvasManager.drawAll(selectionBox);
 });
 redoButton.addEventListener("click", (): void => {
   commandManager.redo();
-  canvasManager.drawAll();
+  canvasManager.drawAll(selectionBox);
 });

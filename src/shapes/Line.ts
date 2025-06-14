@@ -1,6 +1,7 @@
 // класс эллипса с реализацией отрисовки через lineTo
 
 import {Shape} from "./Shape.ts";
+import type {ResizePointType} from "../types/ResizePointType.ts";
 
 export class Line extends Shape {
     draw(ctx: CanvasRenderingContext2D): void {
@@ -36,5 +37,20 @@ export class Line extends Shape {
         const dist: number = Math.hypot(x - closestX, y - closestY);
 
         return dist <= threshold;
+    }
+
+    resize(dx: number, dy: number, resizePoint: ResizePointType): void {
+        switch (resizePoint) {
+            case "start":
+                this.x1 += dx;
+                this.y1 += dy;
+                break;
+            case "end":
+                this.x2 += dx;
+                this.y2 += dy;
+                break;
+            default:
+                throw new Error("Невалидный тип точки изменения размеров!");
+        }
     }
 }

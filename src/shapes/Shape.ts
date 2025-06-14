@@ -1,4 +1,5 @@
 import type { IShape } from "./interfaces/IShape.ts";
+import type {ResizePointType} from "../types/ResizePointType.ts";
 
 // абстрактный класс с реализацией общих методов для всех фигур
 export abstract class Shape implements IShape {
@@ -16,6 +17,12 @@ constructor(
   }
   getY1(): number {
     return this.y1;
+  }
+  getX2(): number {
+    return this.x2
+  }
+  getY2(): number {
+    return this.y2;
   }
 
   setX2(x: number): void {
@@ -41,5 +48,40 @@ constructor(
     this.y1 += dy;
     this.x2 += dx;
     this.y2 += dy;
+  }
+
+  resize(dx: number, dy: number, resizePoint: ResizePointType): void {
+    switch(resizePoint) {
+      case "top":
+        this.y1 += dy;
+        break;
+      case "top-right":
+        this.x2 += dx;
+        this.y1 += dy;
+        break;
+      case "right":
+        this.x2 += dx;
+        break;
+      case "bottom-right":
+        this.x2 += dx;
+        this.y2 += dy;
+        break;
+      case "bottom":
+        this.y2 += dy;
+        break;
+      case "bottom-left":
+        this.x1 += dx;
+        this.y2 += dy;
+        break;
+      case "left":
+        this.x1 += dx;
+        break;
+      case "top-left":
+        this.x1 += dx;
+        this.y1 += dy;
+        break;
+      default:
+        throw new Error("Невалидный тип точки изменения размеров!");
+    }
   }
 }
